@@ -5,8 +5,14 @@ var image = document.getElementById('image');
 image.addEventListener('change', loadImage);
 var im = new Image;	
 
+var pathImage;  
+
+
 function loadImage(event) {	
-	im.src = URL.createObjectURL(event.target.files[0]);	
+	pathImage = event.target.files[0];
+	/*var path  = pathImage
+	module.exports.pathImage = event.target.files[0];*/
+	im.src = URL.createObjectURL(pathImage);	
 	im.onload = function(){
 		context.drawImage(im, 0, 0, canvas.width, canvas.height);
 	}
