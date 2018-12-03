@@ -51,6 +51,11 @@ var context = canv.getContext('2d');
 var image = document.getElementById('image');
 
 
+/* Coordonnées à utiliser pour le tampon*/
+var xSelect1, ySelect1, xSelect2, ySelect2;
+var isSelected = 0; //La sélection peut-être activée
+var isAreaPut = 1; // * copies ont été faites 
+
 class souris extends Button{
 
 	constructor(content,execute){
@@ -61,9 +66,8 @@ class souris extends Button{
 	addListeners(){
 		super.addListeners();
 		this.element.addEventListener("click" , function(e){
-												setPencil = setPipette = setTampon = setContourDetection = 0;	
-
-												//console.log("setPencil = ", setPencil, "setPipette = ", setPipette, "setTampon = ", setTampon, "setContourDetection = ", setContourDetection)
+			setPencil = setPipette = setTampon = setContourDetection = 0;	
+			//console.log("setPencil = ", setPencil, "setPipette = ", setPipette, "setTampon = ", setTampon, "setContourDetection = ", setContourDetection)
 		});
 	}
 }
@@ -129,27 +133,27 @@ class pencil extends Button{
 		});
 
 		canv.addEventListener('mousemove',function (e) {
-								/*console.log("draw = ", draw, "setPencil", setPencil);
-								console.log("\n", color, setPencil, setPipette, setTampon, setContourDetection);	*/
-									if(setPencil && draw){			
-										if(isCercle){
-											//context.fillStyle = color
-											//A revoir 
-											context.beginPath();											
-											context.arc(e.offsetX, e.offsetY, size, 0, 2 * Math.PI);
-											context.strokeStyle = "red";
-											context.stroke();
-											context.fill();
-										}
-										else{
-			    							//context.fillRect( e.offsetX, e.offsetY, size, size);
-			    							//console.log(coordTempX, coordTempY, e.offsetX, e.offsetY);
-			    							self.drawLine(coordTempX, coordTempY, e.offsetX, e.offsetY);
-											coordTempX = e.offsetX;
-											coordTempY = e.offsetY;
-											console.log(color, setPencil, setPipette, setTampon, setContourDetection);	
-										}
-			    					}	
+		/*console.log("draw = ", draw, "setPencil", setPencil);
+		console.log("\n", color, setPencil, setPipette, setTampon, setContourDetection);	*/
+			if(setPencil && draw){			
+				if(isCercle){
+					//context.fillStyle = color
+					//A revoir 
+					context.beginPath();											
+					context.arc(e.offsetX, e.offsetY, size, 0, 2 * Math.PI);
+					context.strokeStyle = "red";
+					context.stroke();
+					context.fill();
+				}
+				else{
+					//context.fillRect( e.offsetX, e.offsetY, size, size);
+					//console.log(coordTempX, coordTempY, e.offsetX, e.offsetY);
+					self.drawLine(coordTempX, coordTempY, e.offsetX, e.offsetY);
+					coordTempX = e.offsetX;
+					coordTempY = e.offsetY;
+					console.log(color, setPencil, setPipette, setTampon, setContourDetection);	
+				}
+			}	
 		});
 	
 		//4requestAnimationFrame(this.pencilDraw(isCercle));
@@ -211,7 +215,77 @@ class tampon extends Button{
 	}
 
 	addListeners(){
+		var self = this;
 		super.addListeners();
+		this.element.addEventListener("mousedown", function(){
+			self.frameLoop();
+		});
+	/* Dupplication  d'une zone d'images*/
+
+	}
+
+	selectArea(){
+		canv.addEventListener("mousedown", function(e){
+			xSelect1 = e.offsetX;
+			ySelect1 = e.offsetY;			  
+		});
+
+		canv.addEventListener("mousemove", function(e){
+			console.log("SelectArea : MouseMove \nisSelected = ", isSelected, "isAreaPut = ", isAreaPut, "\n\n");
+			if(isSelected == 0 && isAreaPut == 1){
+				var x1, x2, y1, y2, w, h;
+				xSelect2 = e.offsetX;
+				ySelect2 = e.offsetY;
+				x1 = Math.min(xSelect1, xSelect2);
+				x2 = Math.max(xSelect1, xSelect2);
+
+				y1 = Math.min(ySelect1, ySelect2);
+				y2 = Math.max(ySelect1, ySelect2);
+
+				w = x2 - x1;
+				h = y2 - y1;
+
+				context.rect(x1, y1, w, h);
+				context.stroke();
+			}	
+		});
+
+
+		canv.addEventListener("mouseup", function(e){
+			xSelect2 = e.offsetX;
+			ySelect2 = e.offsetY;
+			isSelected = 1;
+			isAreaPut = 0;
+			console.log("Fin de la sélection\nisSelected = ", isSelected, "isAreaPut = ", isAreaPut, "\n\n");
+		});
+	}
+
+	putArea(){
+		canv.addEventListener("mousedown", function(e){
+			//Copie de la zone ici
+			//isAreaPut = 1; //Entrain de dessiner
+			if(isSelected == 1 && isAreaPut == 0)
+				console.log("Entrain de dessiner\n");
+		});
+		canv.addEventListener("mouseup", function(e){
+			isAreaPut = 1; //On désactive la copie
+			isSelected = 0; // sélection activée
+			console.log("Fin de la copie\nisSelected = ", isSelected, "isAreaPut = ", isAreaPut, "\n\n");
+		});
+		
+		//console.log("isSelected = ", isSelected);
+	}
+
+	frameLoop(){
+		//if(isSelected == 0 && isAreaPut == 1){			
+			//console.log("selectArea\nisSelected = ", isSelected, "\nisAreaPut = ", isAreaPut, "\n\n");
+			this.selectArea();
+		//}
+		//else if (isSelected == 1 && isAreaPut == 0){
+			//console.log("putArea\nisSelected = ", isSelected, "\nisAreaPut = ", isAreaPut, "\n\n");
+			this.putArea();
+		//}
+		//requestAnimationFrame(frameLoop);
 	}
 }
 
@@ -227,6 +301,7 @@ class ContourDetection extends Button{
 	addListeners(){
 		super.addListeners();
 	}
+
 }
 
 class undo extends Button{
@@ -299,11 +374,11 @@ function anotherClick2(){
 }
 
 function anotherClick3(){
-		console.log("Oh! You've clicked on a tool!\n");
+		console.log("Oh! Tampon!\n");
 }
 
 function anotherClick4(){
-		console.log("Oh! You've clicked on a tool!\n");
+		console.log("Oh! Contour Detection!\n");
 }
 
 function main(){
