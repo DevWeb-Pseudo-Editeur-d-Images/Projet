@@ -50,7 +50,9 @@ var canv = document.getElementById('canvas');
 var context = canv.getContext('2d');
 var image = document.getElementById('image');
 
-
+//var canvasCopy = document.createElement('canvas');
+var contextCopy;// = canvasCopy.getContext('2d');
+//contextCopy  = context.getImageData(0, 0, canv.width, canv.height);
 /* Coordonnées à utiliser pour le tampon*/
 var xSelect1, ySelect1, xSelect2, ySelect2;
 var isSelected = 0; //La sélection peut-être activée
@@ -190,15 +192,11 @@ class pipette extends Button{
 		canv.addEventListener("click", function(e){
 			if(setPipette){
 				var getImgData = context.getImageData(e.offsetX, e.offsetY, 1, 1);
-				//console.log("getImgData = ", getImgData);
 				var r = getImgData.data[0];
 				var g = getImgData.data[1];
 				var b = getImgData.data[2];
 				var str = 'rgb(' + r + ',' + g + ',' + b + ')';
 				color = str;
-				//console.log(color, r, g, b);
-
-				//console.log(color, setPencil, setPipette, setTampon, setContourDetection);
 			}
 		});
 	}
@@ -206,89 +204,85 @@ class pipette extends Button{
 }
 
 
+var x1, y1, w, h;
+
+
 
 class tampon extends Button{
 
 	constructor(content,execute){
 		super(content, execute);
-
 	}
 
 	addListeners(){
 		var self = this;
 		super.addListeners();
-		this.element.addEventListener("mousedown", function(){
-			self.frameLoop();
+		this.element.addEventListener("mousedown", function(event){
+			event.target.style.boxShadow = '10px 10px 10px grey';
+			self.selectArea();
+						
 		});
-	/* Dupplication  d'une zone d'images*/
 
+		this.element.addEventListener("mouseup", function(event){
+			event.target.style.boxShadow = '0px 0px 0px grey';
+		});
 	}
-
+	/* Sélection d'une zone du canvas*/
 	selectArea(){
+
+		var self = this;
+
 		canv.addEventListener("mousedown", function(e){
 			xSelect1 = e.offsetX;
-			ySelect1 = e.offsetY;			  
-		});
+			ySelect1 = e.offsetY;			  	
+		}, {once: true});
 
 		canv.addEventListener("mousemove", function(e){
-			console.log("SelectArea : MouseMove \nisSelected = ", isSelected, "isAreaPut = ", isAreaPut, "\n\n");
-			if(isSelected == 0 && isAreaPut == 1){
-				var x1, x2, y1, y2, w, h;
 				xSelect2 = e.offsetX;
 				ySelect2 = e.offsetY;
-				x1 = Math.min(xSelect1, xSelect2);
-				x2 = Math.max(xSelect1, xSelect2);
-
-				y1 = Math.min(ySelect1, ySelect2);
-				y2 = Math.max(ySelect1, ySelect2);
-
-				w = x2 - x1;
-				h = y2 - y1;
-
-				context.rect(x1, y1, w, h);
-				context.stroke();
-			}	
-		});
-
-
+		
+		}, {once: true});
+	
 		canv.addEventListener("mouseup", function(e){
 			xSelect2 = e.offsetX;
 			ySelect2 = e.offsetY;
-			isSelected = 1;
-			isAreaPut = 0;
-			console.log("Fin de la sélection\nisSelected = ", isSelected, "isAreaPut = ", isAreaPut, "\n\n");
-		});
+
+			var x2, y2;
+			x1 = Math.min(xSelect1, xSelect2);
+			x2 = Math.max(xSelect1, xSelect2);
+
+			y1 = Math.min(ySelect1, ySelect2);
+			y2 = Math.max(ySelect1, ySelect2);
+
+			w = x2 - x1;
+			h = y2 - y1;
+
+			//canvasCopy = context.getImageData(x1 - 1, y1 - 1, w + 2, h + 2);
+			contextCopy = context.getImageData(0, 0, canv.width, canv.height);
+			context.rect(x1, y1, w, h);
+			context.stroke();
+			
+			self.putArea();
+		}, {once: true});
 	}
 
-	putArea(){
-		canv.addEventListener("mousedown", function(e){
-			//Copie de la zone ici
-			//isAreaPut = 1; //Entrain de dessiner
-			if(isSelected == 1 && isAreaPut == 0)
-				console.log("Entrain de dessiner\n");
-		});
-		canv.addEventListener("mouseup", function(e){
-			isAreaPut = 1; //On désactive la copie
-			isSelected = 0; // sélection activée
+	putArea(){			
+		canv.addEventListener("mousedown", function(e){				
+			//context.putImageData(canvasCopy, 0, 0);
+			var partCanvasCopy = context.getImageData(x1, y1, w, h);
+			context.putImageData(contextCopy, 0, 0);
+			context.putImageData(partCanvasCopy, e.offsetX, e.offsetY);
+			contextCopy = context.getImageData(0, 0, canv.width, canv.height);
+			//context.putImageData(canvasCopy, x1 - 1, y1 - 1);
+
+		});	
+		canv.addEventListener("mouseup", function(e){				
+			//contextCopy.clearRect(0, 0, canvasCopy.width, canvasCopy.height);
 			console.log("Fin de la copie\nisSelected = ", isSelected, "isAreaPut = ", isAreaPut, "\n\n");
-		});
-		
-		//console.log("isSelected = ", isSelected);
+		}, {once: true});
 	}
 
-	frameLoop(){
-		//if(isSelected == 0 && isAreaPut == 1){			
-			//console.log("selectArea\nisSelected = ", isSelected, "\nisAreaPut = ", isAreaPut, "\n\n");
-			this.selectArea();
-		//}
-		//else if (isSelected == 1 && isAreaPut == 0){
-			//console.log("putArea\nisSelected = ", isSelected, "\nisAreaPut = ", isAreaPut, "\n\n");
-			this.putArea();
-		//}
-		//requestAnimationFrame(frameLoop);
-	}
 }
-
 
 
 class ContourDetection extends Button{
