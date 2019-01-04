@@ -34,16 +34,16 @@ class Button{
 
 }
 
-var setPencil = 0;
-var setPipette = 0;
-var setTampon = 0;
-var setContourDetection = 0;
+var setPencil = false;
+var setPipette = false;
+var setTampon = false;
+var setContourDetection = false;
 var size = 5;
 var isCercle = 0;
-var color;
+var color = [0, 0, 0, 0];
 var coordTempX;
 var coordTempY;
-var draw = 0;
+var draw = false;
 
 
 var canv = document.getElementById('canvas');
@@ -70,7 +70,7 @@ class souris extends Button{
 	addListeners(){
 		super.addListeners();
 		this.element.addEventListener("click" , function(e){
-			setPencil = setPipette = setTampon = setContourDetection = 0;	
+			setPencil = setPipette = setTampon = setContourDetection = false;	
 			//console.log("setPencil = ", setPencil, "setPipette = ", setPipette, "setTampon = ", setTampon, "setContourDetection = ", setContourDetection)
 		});
 	}
@@ -90,10 +90,8 @@ class pencil extends Button{
 				/* Vu qu'on a activé le crayon on désactive les autres (pipette, tampon et détection
 				 * de contours) pour ne pas mélanger
 				*/
-				setPencil = !setPencil;
-				setPipette = 0;
-				setTampon = 0;
-				setContourDetection = 0;
+				setPencil = true;
+				setPipette = setTampon = setContourDetection = false;
 				coordTempX = event.offsetX;
 				coordTempY = event.offsetY;
 				self.pencilDraw();
@@ -117,7 +115,9 @@ class pencil extends Button{
 		context.moveTo(x1, y1);
 		context.lineTo(x2, y2);
 		context.lineWidth = size;
-		context.strokeStyle = color;
+		var c = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
+		//console.log("\nc = ", c);
+		context.strokeStyle = c;
 		context.stroke();
 	}
 
@@ -126,14 +126,14 @@ class pencil extends Button{
 		var self = this;
 
 		canv.addEventListener('mousedown' ,function (e) {
-			draw = 1; // met draw à 1
+			draw = true; // met draw à 1
 			coordTempX = e.offsetX;
 			coordTempY = e.offsetY;
 			
 		});
 
 		canv.addEventListener('mouseup' ,function (e) {
-			draw = 0; // met draw à 0			
+			draw = false; // met draw à 0			
 		});
 
 		canv.addEventListener('mousemove',function (e) {
@@ -155,7 +155,7 @@ class pencil extends Button{
 					self.drawLine(coordTempX, coordTempY, e.offsetX, e.offsetY);
 					coordTempX = e.offsetX;
 					coordTempY = e.offsetY;
-					console.log(color, setPencil, setPipette, setTampon, setContourDetection);	
+					//console.log(color, setPencil, setPipette, setTampon, setContourDetection);	
 				}
 			}	
 		});
@@ -178,8 +178,8 @@ class pipette extends Button{
 		super.addListeners();
 		this.element.addEventListener("mousedown", function(event){
 			event.target.style.boxShadow = '10px 10px 10px grey';
-			setPencil = setTampon = setContourDetection = 0;
-			setPipette = !setPipette;
+			setPencil = setTampon = setContourDetection = false;
+			setPipette = true;
 
 			self.pickColor();
 		});
@@ -197,8 +197,11 @@ class pipette extends Button{
 				var r = getImgData.data[0];
 				var g = getImgData.data[1];
 				var b = getImgData.data[2];
-				var str = 'rgb(' + r + ',' + g + ',' + b + ')';
-				color = str;
+				var a = getImgData.data[3];
+				//var str = 'rgb(' + r + ',' + g + ',' + b + ')';
+
+				canv.style.borderColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+				color = [r, g, b, a];//str;
 			}
 		});
 	}
@@ -275,6 +278,7 @@ class tampon extends Button{
 	putArea(){			
 		canv.addEventListener("mousedown", function(e){				
 			//context.putImageData(canvasCopy, 0, 0);
+			console.log("\nTampon: ", x1, y1, w, h);
 			var partCanvasCopy = context.getImageData(x1, y1, w, h);
 			context.putImageData(contextCopy, 0, 0);
 			context.putImageData(partCanvasCopy, e.offsetX, e.offsetY);
@@ -306,10 +310,8 @@ class ContourDetection extends Button{
 		super.addListeners();
 		this.element.addEventListener("mousedown", function(event){
 			event.target.style.boxShadow = '10px 10px 10px grey';
-			setPencil = 0;
-			setPipette = 0;
-			setTampon = 0;
-			setContourDetection = !setContourDetection;
+			setPencil = setPipette = setTampon = false;
+			setContourDetection = true;
 			// On appelle la fonction de remplissage
 			self.callFillArea();
 						
@@ -339,73 +341,59 @@ class ContourDetection extends Button{
 	
 	fillArea(){		
 		var self = this;
+		var copy = context.getImageData(0, 0, canv.width, canv.height);
+		var dataCopy = copy.data;
 		var xStart, yStart;
 		var dx = [0, -1, 0, 1];
 		var dy = [-1, 0, 1, 0];
-		//self.drawVerticalLine(25, 40, 70);
 		xStart = xSelect1; yStart = ySelect1;
 		self.pixelStack.push([xStart, yStart]);
 		var pix, x, y, colorFound, west, est, dirX, dirY;
 		console.log("Avant while\nlength = ", self.pixelStack.length);
 		while(self.pixelStack.length){
 			pix = self.pixelStack.pop(); // On dépile le pixel
-			west = pix.slice(); est = pix.slice();
+			west = [pix[0], pix[1]]; est = [pix[0], pix[1]];
 			// On va jusqu'à l'ouest
-			for(; west[0] >= 0 && self.matchTheStartColor(west[0], west[1]); --west[0]);
+			for(; west[0] >= 0 && self.matchTheStartColor(dataCopy, west[0], west[1]); --west[0]);
 			// On va jusqu'à l'est
-			for(; est[0] <= canv.width && self.matchTheStartColor(est[0], est[1]); ++est[0]);
-			for(x = west[0] + 1; x < est[0]; ++x){
-				self.fillPixel(x, pix[1]);
+			for(; est[0] <= canv.width && self.matchTheStartColor(dataCopy, est[0], est[1]); ++est[0])
+			for(x = west[0] + 1, y = pix[1]; x < est[0]; ++x){
+				self.fillPixel(dataCopy, x, y);
 				for(var i = 0; i < 3; i += 2){
-					// Direction Nord et Sud
-					if(self.matchTheStartColor(x + dx[i], pix[1] + dy[i]))
-						self.pixelStack.push([x + dx[i], pix[1] + dy[i]]);						
+					dirX = x + dx[i];
+					dirY = y + dy[i];
+					// Direction Nord et Sud	
+					if(self.matchTheStartColor(dataCopy, dirX, dirY))
+						self.pixelStack.push([dirX, dirY]);						
 				}	
 			}
 		}
+		context.putImageData(copy, 0, 0);
 		console.log("\n\nFini!!!!");
 	}
 
+	fillPixel(data, x, y){
+		data[(y * canv.width + x) * 4]     = color[0];
+		data[(y * canv.width + x) * 4 + 1] = color[1];
+		data[(y * canv.width + x) * 4 + 2] = color[2];
+		data[(y * canv.width + x) * 4 + 3] = color[3];
+	}
+
 	pickColor(x, y){
-		//console.log("\npickColor:\tx = ", x, "\ty = ", y);
 		var getImgData = context.getImageData(x, y, 1, 1);
-		var r = getImgData.data[0];
-		var g = getImgData.data[1];
-		var b = getImgData.data[2];
-		var a = getImgData.data[3];
-		return [r, g, b, a];
+		var data = getImgData.data;
+		return [data[0], data[1], data[2], data[3]];
 	}
 
-	matchTheStartColor(x, y){
+	matchTheStartColor(data, x, y){
+		//console.log ("Hello matchcolor\n");	
 		var self = this;
-		var currentPixel = context.getImageData(x, y, 1, 1).data;
-		return (self.startColor[0] == currentPixel[0] && self.startColor[1] == currentPixel[1] 
-			&&  self.startColor[2] == currentPixel[2] && self.startColor[3] == currentPixel[3]);
+		var pos = (y * canv.width + x) * 4;
+		//var currentPixel = self.dataCopy[pos];
+		return (self.startColor[0] == data[pos] && self.startColor[1] == data[pos +1] 
+			&&  self.startColor[2] == data[pos + 2] && self.startColor[3] == data[pos + 3]);
 	}
 
-	fillPixel(x, y){
-		context.fillStyle = color;
-		context.fillRect(x, y, 1, 1);
-	}
-
-
-	drawLine(x1, y1, x2, y2){
-		context.beginPath();
-		context.lineJoin = "round";
-		context.moveTo(x1, y1);
-		context.lineTo(x2, y2);
-		context.lineWidth = size;
-		context.strokeStyle = color;
-		context.stroke();
-	}
-
-	drawVerticalLine(x, y1, y2){
-		var yMax = Math.max(y1, y2);
-		var yMin = Math.min(y1, y2);
-		for(var y = yMin; y < yMax + 1; ++y)
-			this.fillPixel(x, y);
-	}
-	
 }
 
 class undo extends Button{
@@ -419,11 +407,11 @@ class undo extends Button{
 		super.addListeners();
 		this.element.addEventListener("click" , function(e){
 
-			/* clear la canvas*/
-			/*
+			/* clear le canvas*/
+			
 			context.setTransform(1, 0, 0, 1, 0, 0);	
 			context.clearRect(0, 0, canv.width, canv.height);	
-			*/
+			
 
 			loadImage(e);
 
@@ -442,9 +430,12 @@ function createDiv(c){
 	newDiv.addEventListener('click', function(e){
 		//pick color
 		/* soustraire de la couleur ne newDiv uniquement où rgb est défini*/
-		var str = newDiv.style.background;;
-		color = str.split(" none", 1);
-		console.log("color picked : ", color);
+		var str = newDiv.style.background;
+		var rgb = str.replace('none repeat scroll 0% 0%', '');
+		canv.style.borderColor = rgb;
+		rgb = rgb.match(/\d+/g).map(function(item) { return parseInt(item, 10); });
+		color = rgb.concat([255]);
+		//console.log("color picked : ", color, "\nstr = ", str);
 	});
 }
 
