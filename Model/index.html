@@ -10,7 +10,7 @@
 		
 	</head>
 	<body>
-		<canvas id = "canvas" width = "800" height = "600" style = "border: 5px solid ; color : green" >
+		<canvas id = "canvas" width = "800" height = "600" style = "border: 5px solid ; color : black" >
 		</canvas>
 		
 		<div >
@@ -25,15 +25,26 @@
 		  <p  style = "color : grey;"> Saturation : <span id = "saturPar"></span>%</p>
 		  <input type = "range" id = "satur" min = "1" max = "100" value = "100">
 		</div>  
+		<!-- Choisissez la taille de la pointe du crayon-->
+		<label for = "Size">Taille</label> 
+
+		<select onChange="updateSize(this);" name="size"> 
+		    <option value = "1" selected="selected"> 1 </option>
+		    <option value = "2"> 2 </option>
+		    <option value = "5"> 5 </option>
+		    <option value = "7"> 7 </option>
+		    <option value = "10"> 10 </option>
+		    <option value = "12"> 12 </option>
+		    <option value = "15"> 15 </option>
+		    <option value = "17"> 17 </option>
+		</select>
+		<select onChange="updateTypePencil(this);" name="typePencil"> 		
+		    <option value = "0" selected="selected"> En carré </option>
+		    <option value = "1"> En cercle </option>
+		</select>
+		</br> </br>
 
 		<script src = "../Controller/js/fichier.js"></script>
-		<script src = "../Controller/js/button.js"></script>
-		<!--<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>-->
-
-		<!--<script src="../tapmodo-Jcrop-1902fbc/js/jquery.min.js"></script>
-		<script src="../tapmodo-Jcrop-1902fbc/js/jquery.Jcrop.min.js"></script>
-		<link rel="stylesheet" href="../tapmodo-Jcrop-1902fbc/css/jquery.Jcrop.css" type="text/css" /> -->
-
-	</body>
- 
+		<script src = "../Controller/js/button.js"></script>		
+	</body> 
 </html>
