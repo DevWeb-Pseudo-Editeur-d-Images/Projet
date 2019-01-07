@@ -52,7 +52,8 @@ https://fr.wikipedia.org/wiki/ Algorithme_de_remplissage_par_diffusion#Optimisat
 https://www.w3schools.com 
 https://developer.mozilla.org/fr/docs/Web/JavaScript 
 https://stackoverflow.com/questions/14976495/get-selected-option-text-with- javascrip 
-https://stackoverflow.com/questions/34980574/how-to-extract-color-values-from- rgb-string-in-javascript 
+https://stackoverflow.com/questions/34980574/how-to-extract-color-values-from- rgb-string-in-javascript
+
 https://codepen.io/Geeyoam/pen/vLGZzG 
 https://labs.eleks.com/2012/11/html5-canvas-performance-and.html 
 https://bl.ocks.org/jon-hall/2fc30039629ef22bc95c 
