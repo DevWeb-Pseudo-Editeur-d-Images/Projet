@@ -14,11 +14,11 @@ I. Introduction
   Dans le cadre d’un projet universitaire, nous devions faire l’implémentation d’un éditeur d’images basique. 
 Il doit comporter les quatre outils élémentaires à savoir: crayon, pipette, tampon, pot de peinture.
 
-    Pour l'élaboration de ces derniers et pour une bonne organisation, nous avons établi un ordre à suivre pour l’implémentation de chacun: crayon, pipette, pot de peinture et tampon. Cependant, au cours de notre implémentation nous avons changé l’ordre préétabli. En effet, nous avons préféré commencer par faire le tampon avant le pot de peinture car nous nous sommes rendues compte que tampon allait être plus rapide et plus simple à implémenter que le pot de peinture. 
+  Pour l'élaboration de ces derniers et pour une bonne organisation, nous avons établi un ordre à suivre pour l’implémentation de chacun: crayon, pipette, pot de peinture et tampon. Cependant, au cours de notre implémentation nous avons changé l’ordre préétabli. En effet, nous avons préféré commencer par faire le tampon avant le pot de peinture car nous nous sommes rendues compte que tampon allait être plus rapide et plus simple à implémenter que le pot de peinture. 
     
-    Nous avons bien évidemment penser à créer une palette avec un nombre limité de couleurs. 
+  Nous avons bien évidemment penser à créer une palette avec un nombre limité de couleurs. 
     
-    Dans un premier temps, nous expliquerons brièvement les implémentations qui ont été faites. Ensuite, nous citerons les quelques options que nous aurions souhaité réaliser pour ce projet.
+   Dans un premier temps, nous expliquerons brièvement les implémentations qui ont été faites. Ensuite, nous citerons les quelques options que nous aurions souhaité réaliser pour ce projet.
 
 
 II- Brèves explications de l’implémentation des outils 
