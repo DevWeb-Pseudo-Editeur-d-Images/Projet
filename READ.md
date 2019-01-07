@@ -49,9 +49,13 @@ Conclusion:
 Sources: 
 
 https://fr.wikipedia.org/wiki/ Algorithme_de_remplissage_par_diffusion#Optimisations 
+
 https://www.w3schools.com 
+
 https://developer.mozilla.org/fr/docs/Web/JavaScript 
+
 https://stackoverflow.com/questions/14976495/get-selected-option-text-with- javascrip 
+
 https://stackoverflow.com/questions/34980574/how-to-extract-color-values-from- rgb-string-in-javascript
 
 https://codepen.io/Geeyoam/pen/vLGZzG 
